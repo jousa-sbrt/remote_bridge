@@ -30,7 +30,7 @@ def _open_db(path: str) -> sqlite3.Connection:
     return conn
 
 
-async def query_db(conn: sqlite3.Connection, resource: str, params: Dict[str, Any]) -> Dict[str, Any]:
+def query_db(conn: sqlite3.Connection, resource: str, params: Dict[str, Any]) -> Dict[str, Any]:
     limit = int(params.get("limit", 100))
     limit = max(1, min(limit, 500))
     if resource == "probabilities":
