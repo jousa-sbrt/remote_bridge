@@ -152,27 +152,22 @@ def create_app() -> web.Application:
     return app
 
 
-def main():
+async def async_main():
     app = create_app()
-    loop = asyncio.get_event_loop()
     runner = web.AppRunner(app)
-
-    async def start():
-        await runner.setup()
-        site = web.TCPSite(runner, host="0.0.0.0", port=int(os.environ.get("PORT", "8080")))
-        await site.start()
-        print("Relay server listening on /ws (health at /health)")
-
-    loop.run_until_complete(start())
+    await runner.setup()
+    site = web.TCPSite(runner, host="0.0.0.0", port=int(os.environ.get("PORT", "8080")))
+    await site.start()
+    print("Relay server listening on /ws (health at /health)")
 
     stop = asyncio.Event()
+    loop = asyncio.get_running_loop()
     for sig in (signal.SIGINT, signal.SIGTERM):
         loop.add_signal_handler(sig, stop.set)
-    try:
-        loop.run_until_complete(stop.wait())
-    finally:
-        loop.run_until_complete(runner.cleanup())
+
+    await stop.wait()
+    await runner.cleanup()
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(async_main())
