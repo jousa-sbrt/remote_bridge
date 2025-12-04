@@ -46,6 +46,7 @@ async def ws_handler(request: web.Request) -> web.StreamResponse:
     if not role:
         await ws.close(code=4000, message=b"auth failed")
         return ws
+    print(f"client connected as {role}")
 
     if role == "producer":
         async with state.lock:
@@ -107,7 +108,8 @@ async def handle_consumer(ws: web.WebSocketResponse, state: RelayState):
             continue
         if not isinstance(data, dict) or data.get("type") != "get":
             continue
-        req_id = str(uuid.uuid4())
+        client_req_id = data.get("request_id")
+        req_id = client_req_id or str(uuid.uuid4())
         if not state.producer:
             await ws.send_json(
                 {"type": "response", "request_id": req_id, "status": "error", "error": "producer_offline"}
