@@ -7,20 +7,20 @@ Ziel: App <-> Render Relay <-> Ubuntu-Box (hinter Firewall). Ubuntu pusht nicht 
 - `remote_bridge/bridge_client.py` (Ubuntu): Baut WSS-Verbindung auf, liest aus `live_signals.db` (read-only, WAL-freundlich), beantwortet Requests.
 
 ## Deployment Render (kostenloses Web Service)
-1. Runtime: Python 3.11+, `websockets` als Dependency.
+1. Runtime: Python 3.11+, Dependencies: `aiohttp`, `websockets` (siehe requirements.txt).
 2. Env Vars:
    - `PRODUCER_TOKEN` (geheim, Ubuntu benutzt ihn)
    - `CONSUMER_TOKEN` (geheim, App benutzt ihn)
    - `PORT` (Render setzt automatisch, Code nutzt Default 8080)
 3. Start Command: `python remote_bridge/server.py`
-4. Service-URL: `wss://<dein-service>.onrender.com`
+4. Service-URL: `wss://<dein-service>.onrender.com/ws` (Health: `/health`)
 
 ## Protokoll (JSON)
 ### Auth (beide Rollen)
 `{"type":"auth","role":"producer"|"consumer","token":"<token>"}`  
 Antwort bei Erfolg: `{"type":"auth_ok","role":"<role>"}`
 
-### Consumer -> Relay
+### Consumer -> Relay (WS Pfad `/ws`)
 `{"type":"get","resource":"probabilities"|"trades","params":{"limit":100}}`
 
 ### Relay -> Producer
@@ -39,7 +39,7 @@ Timeout: 10s pro Request.
 ## Ubuntu-Client starten
 ```bash
 python remote_bridge/bridge_client.py \
-  --url wss://<dein-service>.onrender.com \
+  --url wss://<dein-service>.onrender.com/ws \
   --token "$PRODUCER_TOKEN" \
   --db live_signals.db
 ```

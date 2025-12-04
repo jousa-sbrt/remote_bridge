@@ -88,7 +88,7 @@ async def handle_requests(uri: str, token: str, db_path: str):
 
 def parse_args():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--url", default=os.getenv("RELAY_URL", "ws://localhost:8080"), help="ws(s):// relay url")
+    ap.add_argument("--url", default=os.getenv("RELAY_URL", "ws://localhost:8080/ws"), help="ws(s):// relay url")
     ap.add_argument("--token", default=os.getenv("PRODUCER_TOKEN", "producer-secret"), help="producer auth token")
     ap.add_argument("--db", default=os.getenv("SQLITE_PATH", "live_signals.db"), help="path to SQLite db")
     return ap.parse_args()
